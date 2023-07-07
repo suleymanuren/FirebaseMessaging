@@ -14,28 +14,15 @@ struct MessageScreenView: View {
     
     var body: some View {
         VStack {
-            
-            ScrollViewReader { proxy in
-                ScrollView {
-                    ForEach ( messageService.messages) { message in
-                        ChatBubble(messages: message,userID: userId)
-                    }
-                }
-                .padding(.top,10)
-                .background(.white)
-                .cornerRadius(12)
-                .onChange(of: messageService.lastMessageId) { id in
-                    withAnimation {
-                        proxy.scrollTo(id, anchor: .bottom)
-                    }
-                }
-            }
+       
+            ChatBubble(userID: userId)
+               
             Divider()
             HStack{
-                TextField("Mesaj Gönder", text: $message)
+                TextField(userId, text: $message)
 
                 Button {
-                    messageService.sendMessage(text: message,userID: userId )
+                    messageService.sendMessage(text: message,senderId: userId , receiverId: userId == "Dd2YMSBwWvfBHCq3p7e8pdd3fSF3" ? "XQL3QL52BbWVEwMKKgMYwHVbDEH2" : "")
                     message = ""
                 } label: {
                     Image(systemName: "paperplane.fill")

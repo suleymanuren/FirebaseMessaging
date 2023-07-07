@@ -8,50 +8,83 @@
 import SwiftUI
 
 struct ChatBubble: View {
-    let messages : Message
+    @StateObject private var messageService = MessageService()
     @State private var showTime = false
     let userID : String
-
+    
     var body: some View {
-        VStack(alignment: messages.receiverID == userID ? .leading : .trailing) {
-            HStack {
-                Image(messages.receiverID == userID ? "" : "sender")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 25)
-                Text(messages.message)
-                    .padding()
-                    .background(messages.receiverID != userID ? Color(.systemGray).opacity(0.5) : Color(.systemGreen).opacity(0.8))
-                    .clipShape(ChatBubbleRadius(isFromSender: messages.receiverID == userID ? true : false ))
+        ScrollViewReader { proxy in
+            ScrollView {
+                ForEach ( messageService.messages) { messages in
+                    if messages.senderID == userID {
+                        VStack(alignment: .trailing) {
+                            HStack{
+                                Text(messages.message)
+                                    .padding()
+                                    .cornerRadius(12)
+                                    .background(Color(.systemGreen))
+                                    .clipShape(ChatBubbleRadius(isFromSender: true))
+                                Image("sender")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 30)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .onTapGesture {
+                                showTime.toggle()
+                            }
+                            if showTime {
+                                Text("\(messages.timestamp.formatted(.dateTime.hour().minute()))")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 25)
+                            }
+                        }.padding(.trailing,12)
+                        
+                    }else {
+                        VStack(alignment: .leading) {
+                            HStack{
+                                Image("receiver")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 30)
+                                Text(messages.message)
+                                    .padding()
+                                    .cornerRadius(12)
+                                    .background(Color(.systemGray5))
+                                    .clipShape(ChatBubbleRadius(isFromSender: false))
+                                
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .onTapGesture {
+                                showTime.toggle()
+                            }
+                            if showTime {
+                                Text("\(messages.timestamp.formatted(.dateTime.hour().minute()))")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                                    .padding(.leading, 25)
+                            }
+                        }.padding(.leading,12)
+                    }
+                    
+                }
                 
-                Image(messages.receiverID != userID ? "receiver" : "")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 25)
             }
-            .frame(maxWidth: 300, alignment: messages.receiverID == userID ? .trailing : .leading)
-            .onTapGesture {
-                showTime.toggle()
-            }
-            
-            if showTime {
+            .padding(.top,10)
+            .background(.white)
+            .cornerRadius(12)
+            .onChange(of: messageService.lastMessageId) { id in
                 withAnimation {
-                    Text("\(messages.timestamp.formatted(.dateTime.hour().minute()))")
-                        .font(.caption2)
-                        .foregroundColor(.gray)
-                        .padding(messages.receiverID == userID ? .leading : .trailing)
+                    proxy.scrollTo(id, anchor: .bottom)
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: messages.receiverID == userID ? .leading : .trailing)
-        .padding(messages.receiverID == userID ? .leading : .trailing)
-        .padding(.horizontal, 10)
-
     }
 }
 
 struct ChatBubble_Previews: PreviewProvider {
     static var previews: some View {
-        ChatBubble(messages: Message(id: "23",message: "123",receiverID: "123", senderID: "123", timestamp: Date()), userID: "123")
+        ChatBubble(userID: "123")
     }
 }

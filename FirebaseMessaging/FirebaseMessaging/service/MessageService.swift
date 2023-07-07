@@ -55,10 +55,10 @@ class MessageService : ObservableObject {
     }
   
     // Add a message in Firestore
-    func sendMessage(text: String,userID : String) {
+    func sendMessage(text: String,senderId : String,receiverId : String) {
         do {
             // Create a new Message instance, with a unique ID, the text we passed, a received value set to false (since the user will always be the sender), and a timestamp
-            let newMessage = Message(id: "\(UUID())", message: text,receiverID: "Dd2YMSBwWvfBHCq3p7e8pdd3fSF3",senderID: "XQL3QL52BbWVEwMKKgMYwHVbDEH2", timestamp: Date())
+            let newMessage = Message(id: "\(UUID())", message: text,receiverID: receiverId,senderID: senderId, timestamp: Date())
             
             // Create a new document in Firestore with the newMessage variable above, and use setData(from:) to convert the Message into Firestore data
             // Note that setData(from:) is a function available only in FirebaseFirestoreSwift package - remember to import it at the top
